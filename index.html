@@ -1,0 +1,146 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Malla Interactiva - Enfermería UNPAZ</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f3f3f3;
+      margin: 20px;
+      color: #333;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    .controls {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .controls input {
+      padding: 6px 10px;
+      font-size: 16px;
+      width: 250px;
+      margin-right: 10px;
+    }
+    .controls button {
+      padding: 6px 15px;
+      font-size: 16px;
+      background: #ccc;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    h2 {
+      margin-top: 40px;
+    }
+    .year {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .course {
+      padding: 10px 15px;
+      background: #ffffff;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+      min-width: 280px;
+      text-align: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      font-weight: 500;
+    }
+    .course.locked {
+      background: #e0e0e0;
+      color: #888;
+      cursor: not-allowed;
+    }
+    .course.done {
+      text-decoration: line-through;
+      background: #c8e6c9;
+      color: #444;
+    }
+    .y1 { background-color: #ffd1dc; }    /* rosa pastel */
+    .y2 { background-color: #d0ebff; }    /* celeste pastel */
+    .y3 { background-color: #fff4b3; }    /* amarillo pastel */
+    .y4 { background-color: #d2f8d2; }    /* verde pastel */
+    .y5 { background-color: #e6d0f7; }    /* lila pastel */
+  </style>
+</head>
+<body>
+  <h1>Malla Interactiva - Lic. en Enfermería (UNPAZ)</h1>
+
+  <div class="controls">
+    <input type="text" id="buscador" placeholder="Buscar materia...">
+    <button onclick="resetearMalla()">Desmarcar todo</button>
+  </div>
+
+  <div id="malla-container"></div>
+
+  <script>
+    const cursos = [{"id": "01", "nombre": "Introducción a la Enfermería", "año": 1, "correquisitos": []}, {"id": "02", "nombre": "Enfermería en cuidados de salud de la mujer", "año": 1, "correquisitos": []}, {"id": "03", "nombre": "Anatomía y Fisiología aplicadas", "año": 1, "correquisitos": []}, {"id": "04", "nombre": "Antropología de la salud", "año": 1, "correquisitos": []}, {"id": "05", "nombre": "Introducción a la Psicología", "año": 1, "correquisitos": []}, {"id": "06", "nombre": "Física y Química aplicada", "año": 1, "correquisitos": []}, {"id": "07", "nombre": "Deontología, salud y derechos humanos", "año": 1, "correquisitos": []}, {"id": "08", "nombre": "Enfermería en el cuidado materno infantil", "año": 2, "correquisitos": ["01", "02", "03"]}, {"id": "09", "nombre": "Microbiología y Parasitología", "año": 2, "correquisitos": ["06"]}, {"id": "10", "nombre": "Farmacología en Enfermería", "año": 2, "correquisitos": ["01", "03", "06"]}, {"id": "11", "nombre": "Introducción a la Sociología de la salud", "año": 2, "correquisitos": []}, {"id": "12", "nombre": "Taller de Inglés I", "año": 2, "correquisitos": []}, {"id": "13", "nombre": "Enfermería en cuidados de NNyA", "año": 2, "correquisitos": ["01", "03"]}, {"id": "14", "nombre": "Enfermería comunitaria", "año": 2, "correquisitos": ["01", "04"]}, {"id": "15", "nombre": "Alimentación, dietoterapia y salud", "año": 2, "correquisitos": ["03", "06"]}, {"id": "16", "nombre": "Epidemiología", "año": 2, "correquisitos": ["01"]}, {"id": "17", "nombre": "Taller de informática de la salud", "año": 2, "correquisitos": []}, {"id": "18", "nombre": "Enfermería en salud mental comunitaria", "año": 3, "correquisitos": ["05", "14"]}, {"id": "19", "nombre": "Enfermería en el cuidado del adulto", "año": 3, "correquisitos": ["10", "15"]}, {"id": "20", "nombre": "Filosofía del cuidado I", "año": 3, "correquisitos": ["11"]}, {"id": "21", "nombre": "Gestión servicios enfermería", "año": 3, "correquisitos": ["08", "13", "14", "19"]}, {"id": "22", "nombre": "Electiva 1", "año": 3, "correquisitos": []}, {"id": "23", "nombre": "Enfermería en el cuidado del adulto mayor", "año": 3, "correquisitos": ["19"]}, {"id": "24", "nombre": "Electiva 2", "año": 3, "correquisitos": []}, {"id": "25", "nombre": "Introducción a la investigación", "año": 3, "correquisitos": ["11", "14", "16"]}, {"id": "26", "nombre": "Práctica integrada I", "año": 3, "correquisitos": ["08", "13", "14", "19"]}, {"id": "27", "nombre": "Enfermería en salud colectiva", "año": 4, "correquisitos": ["20", "25", "26"]}, {"id": "28", "nombre": "Cuidados críticos de NNyN", "año": 4, "correquisitos": ["26"]}, {"id": "29", "nombre": "Investigación aplicada", "año": 4, "correquisitos": ["25"]}, {"id": "30", "nombre": "Sociología de la salud", "año": 4, "correquisitos": ["11"]}, {"id": "31", "nombre": "Cuidados críticos de adultos", "año": 4, "correquisitos": ["26"]}, {"id": "32", "nombre": "Bioética y desarrollo profesional", "año": 4, "correquisitos": ["07", "20", "25"]}, {"id": "33", "nombre": "Taller de investigación aplicada", "año": 5, "correquisitos": ["29", "32"]}, {"id": "34", "nombre": "Ciencia y tecnología en Enfermería", "año": 5, "correquisitos": ["20", "25"]}, {"id": "35", "nombre": "Educación y comunicación en salud", "año": 5, "correquisitos": ["27"]}, {"id": "36", "nombre": "Gestión en escenarios comunitarios", "año": 5, "correquisitos": ["21", "27"]}, {"id": "37", "nombre": "Gestión hospitalaria", "año": 5, "correquisitos": ["21", "27"]}, {"id": "38", "nombre": "Práctica integrada II", "año": 5, "correquisitos": ["27", "28", "31", "32"]}, {"id": "39", "nombre": "Filosofía del cuidado II", "año": 5, "correquisitos": ["20"]}];
+    let estado = JSON.parse(localStorage.getItem("estadoEnfermeria") || "{}");
+
+    function guardarEstado() {
+      localStorage.setItem("estadoEnfermeria", JSON.stringify(estado));
+    }
+
+    function resetearMalla() {
+      if (confirm("¿Seguro que querés desmarcar todo?")) {
+        estado = {};
+        guardarEstado();
+        crearMalla();
+      }
+    }
+
+    function crearMalla() {
+      const container = document.getElementById("malla-container");
+      const filtro = document.getElementById("buscador").value.toLowerCase();
+      container.innerHTML = "";
+
+      const años = [...new Set(cursos.map(c => c.año))];
+      años.forEach(año => {
+        const h2 = document.createElement("h2");
+        h2.textContent = `Año ${año}`;
+        container.appendChild(h2);
+
+        const añoDiv = document.createElement("div");
+        añoDiv.classList.add("year");
+
+        cursos.filter(c => c.año === año).forEach(curso => {
+          if (filtro && !curso.nombre.toLowerCase().includes(filtro)) return;
+
+          const div = document.createElement("div");
+          div.classList.add("course", `y${año}`);
+          div.textContent = curso.nombre;
+          div.id = curso.id;
+
+          const bloqueado = curso.correquisitos.some(id => !estado[id]);
+          if (bloqueado) div.classList.add("locked");
+          else div.classList.remove("locked");
+
+          if (estado[curso.id]) div.classList.add("done");
+
+          div.addEventListener("click", () => {
+            if (div.classList.contains("locked")) return;
+            estado[curso.id] = !estado[curso.id];
+            guardarEstado();
+            crearMalla();
+          });
+
+          añoDiv.appendChild(div);
+        });
+
+        container.appendChild(añoDiv);
+      });
+    }
+
+    document.getElementById("buscador").addEventListener("input", crearMalla);
+    crearMalla();
+  </script>
+</body>
+</html>
